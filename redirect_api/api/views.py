@@ -1,15 +1,14 @@
 from rest_framework.response import Response
 from rest_framework import viewsets
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from .models import Lesson
 from .serializers import LessonSerializer
-from django.http import Http404
 from datetime import datetime
 
+lessons = {}
 
 class LessonViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Lesson.objects.all()
-    model = Lesson
     serializer_class = LessonSerializer
     
     # 詳細画面
@@ -22,9 +21,15 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
             day = '11'
         elif now.day >= 20:
             day = '21'
-        url_date = now.strftime('%Y%m') + day   
-        # オブジェクトを取得
-        instance = self.get_object()
+        url_date = now.strftime('%Y%m') + day
+        # requestからpkを取得し、整数型として扱う
+        pk = kwargs.get('pk')
+        # pkをキーにしてlessonsに格納
+        if pk not in lessons:
+            instance = self.get_object()
+            lessons[pk] = instance
+        else:
+            instance = lessons[pk]
         
         # リダイレクトURLを決定。instance.urlがNoneの場合は、instance.default_urlを使用
         redirect_url = instance.url or instance.default_url
