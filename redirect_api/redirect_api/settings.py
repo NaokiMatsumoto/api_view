@@ -124,7 +124,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "naokimatsu.pythonanywhere.com"]
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'redirect_api.api.utils.custom_exception_handler'
