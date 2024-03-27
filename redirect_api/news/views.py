@@ -1,8 +1,24 @@
-from django.views.generic import ListView
+from django.views.generic import ListView, RedirectView
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from .models import NewsSource, NewsArticle
-from datetime import datetime
+from datetime import datetime, date
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.views.decorators.http import require_POST
+
+
+class NewsSourceListRedirectView(RedirectView):
+    permanent = False
+    query_string = True
+
+    def get_redirect_url(self, *args, **kwargs):
+        today = date.today()
+        return reverse('news_list', kwargs={
+            'year': today.year,
+            'month': today.month,
+            'day': today.day
+        })
 
 class NewsSourceListView(ListView):
     model = NewsSource
@@ -32,10 +48,6 @@ class NewsSourceListView(ListView):
         )
         return context
 
-
-from django.shortcuts import redirect
-from django.urls import reverse
-from django.views.decorators.http import require_POST
 
 @require_POST
 def hide_articles(request, year, month, day):
