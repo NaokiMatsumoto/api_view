@@ -17,10 +17,8 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
         now = datetime.now()
         # 日付に基づいてリダイレクトURLに使用する日付の部分を決定
         day = '01'
-        if 11 <= now.day < 20:
+        if 6 <= now.day:
             day = '11'
-        elif now.day >= 20:
-            day = '21'
         url_date = now.strftime('%Y%m') + day
         # requestからpkを取得し、整数型として扱う
         pk = kwargs.get('pk')
