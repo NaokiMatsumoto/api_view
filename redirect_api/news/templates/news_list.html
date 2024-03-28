@@ -60,7 +60,7 @@
                                     <input type="checkbox" class="form-check-input" id="article-{{ article.id }}" data-article-id="{{ article.id }}">
                                     <label class="form-check-label" for="article-{{ article.id }}"></label>
                                 </div>
-                                <a href="{{ article.url }}">{{ article.title }}</a>
+                                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
                             </li>
                         {% empty %}
                             <li class="list-group-item">No articles found for this news source on {{ published_at|date:"F j, Y" }}.</li>
