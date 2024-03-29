@@ -8,13 +8,32 @@ $(document).ready(function() {
         hideButton.toggleClass('show', checkedCount > 0);
     }
 
-    checkboxes.change(updateHideButtonVisibility);
+    $(document).on('mousedown', '.list-group-item', function(e) {
+        // チェックボックスまたはそのラベルがクリックされた場合は、デフォルトの動作を許可する
+        if ($(e.target).is('a')) {
+            return; // この場合は、以下のロジックを実行せずに早期に関数から抜ける
+        }
+        
+        // アンカータグがクリックされた場合は、デフォルトの振る舞いを阻害しない
+        e.preventDefault(); // これにより、アンカー以外の要素がクリックされた場合にのみデフォルト動作を阻害する
+        var checkbox = $(this).find('.hide-checkbox');
+        if(checkbox.is(':checked')){
+            checkbox.prop('checked', false).attr('value', 'false'); // チェックボックスの状態を切り替える
+        }else{
+            checkbox.prop('checked', true).attr('value', 'true'); // チェックボックスの状態を切り替える
+        }
+        // ここでupdateHideButtonVisibilityを呼び出す
+        updateHideButtonVisibility();
+    });
+    
+
 
     hideForm.submit(function(event) {
         event.preventDefault();
-        var selectedArticleIds = checkboxes.filter(':checked').map(function() {
-            return $(this).data('article-id');
-        }).get();
+        var selectedArticleIds = [];
+        checkboxes.filter(':checked').each(function() {
+            selectedArticleIds.push($(this).data('article-id'));
+        });
 
         $('<input>').attr({
             type: 'hidden',
@@ -94,9 +113,12 @@ $(document).ready(function() {
     $('.list-group-item').click(function(e) {
         e.preventDefault();
         var targetId = $(this).data('target');
-        var targetPosition = $(targetId).offset().top;
-        $('html, body').animate({
-            scrollTop: targetPosition
-        }, 500);
+        if (targetId) {
+            var targetPosition = $(targetId).offset().top;
+            $('html, body').animate({
+                scrollTop: targetPosition
+            }, 500);
+        }
     });
+
 });
