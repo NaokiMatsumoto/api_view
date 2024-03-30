@@ -6,9 +6,11 @@ from datetime import datetime, date
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
-class NewsSourceListRedirectView(RedirectView):
+class NewsSourceListRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
     query_string = True
 
@@ -20,9 +22,9 @@ class NewsSourceListRedirectView(RedirectView):
             'day': today.day
         })
 
-class NewsSourceListView(ListView):
+class NewsSourceListView(LoginRequiredMixin, ListView):
     model = NewsSource
-    template_name = 'news_list.html'
+    template_name = 'news/news_list.html'
     context_object_name = 'news_sources'
 
     def get_queryset(self):
@@ -50,6 +52,7 @@ class NewsSourceListView(ListView):
 
 
 @require_POST
+@login_required
 def hide_articles(request, year, month, day):
     article_ids = request.POST.get('article_ids', '').split(',')
     NewsArticle.objects.filter(id__in=article_ids).update(shown=False)

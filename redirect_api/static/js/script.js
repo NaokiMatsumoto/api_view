@@ -53,7 +53,7 @@ $(document).ready(function() {
         var year = dateArray[0];
         var month = dateArray[1];
         var day = dateArray[2];
-        window.location.href = "{% url 'news_list' 0 0 0 %}".replace(/\/0\/0\/0\/$/, '/' + year + '/' + month + '/' + day + '/');
+        window.location.href = `/news/${year}/${month}/${day}/`;
     });
 
     var clickedLinks = JSON.parse(localStorage.getItem('clickedLinks')) || {};
@@ -78,6 +78,9 @@ $(document).ready(function() {
     localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
 
     function addClickedClass(link) {
+        if(!link.startsWith('http')){
+            return;
+        }
         if (clickedLinks.hasOwnProperty(link)) {
             $(this).addClass('clicked');
         }
@@ -93,7 +96,7 @@ $(document).ready(function() {
         addClickedClass.call(this, link);
     });
 
-    $('a:not(.list-group-item, .card-title a)').click(function(event) {
+    $('a:not(.list-group-item, .card-title a, .date-navigation a)').click(function(event) {
         event.preventDefault();
         var link = $(this).attr('href');
         if (!clickedLinks.hasOwnProperty(link)) {
