@@ -14,14 +14,14 @@ class NewsSource(models.Model):
 
 class NewsArticle(models.Model):
     news_source = models.ForeignKey(NewsSource, on_delete=models.CASCADE)
-    url = models.URLField(unique=True)
+    url = models.URLField(unique=True, db_index=True)
     title = models.CharField(max_length=255)
     japanese_title = models.CharField(max_length=255, default='')
     content = models.TextField(default='')
     japanese_content = models.CharField(max_length=255, default='')
     shown = models.BooleanField(default=True)
     is_scraped = models.BooleanField(default=False)
-    published_at = models.DateField(auto_now_add=True)
+    published_at = models.DateField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return self.title
