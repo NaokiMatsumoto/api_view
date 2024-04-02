@@ -70,7 +70,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
 
     def redirect_to_current_date(self):
         current_date = timezone.now().date()
-        return redirect(reverse('news_list', args=[current_date.year, current_date.month, current_date.day]))
+        return redirect(reverse('news:news_list', args=[current_date.year, current_date.month, current_date.day]))
 
 
     def get_queryset(self):
