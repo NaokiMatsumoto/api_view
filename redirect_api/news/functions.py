@@ -17,6 +17,8 @@ def scrape_articles(news_source, shown=True):
             continue
         if article_url in processed_urls:
             continue
+        if article_host is not None and news_source.host != article_host:
+            continue
         if article_host is None:
             article_url = f"https://{news_source.host}{article_url}"
         processed_urls.add(article_url)
