@@ -20,16 +20,16 @@
 {% endblock %}
 {% block script %}
 <script>
-    // ページ読み込み時にEasyMDEを初期化
-    var easyMDE = new EasyMDE({element: document.getElementById('{{ form.content.id_for_label }}')});
-
-    document.querySelector('.form').addEventListener('submit', function() {
-        // ここでは、フォーム送信時にEasyMDEエディタからテキストを取得して、<textarea>にセットする処理のみを行います。
-        // EasyMDEエディタからテキストを取得
-        var markdownText = easyMDE.value();
-        // 取得したテキストを<textarea>にセット
-        document.getElementById('{{ form.content.id_for_label }}').value = markdownText;
-    });
+// EasyMDEを初期化
+var easyMDE = new EasyMDE({element: document.getElementById('{{ form.content.id_for_label }}')});
+// フォームのsubmitイベントリスナーを設定
+document.querySelector('.form').addEventListener('submit', function(event) {
+    // EasyMDEエディタから現在のテキストを取得
+    var markdownText = easyMDE.value();
+    // <textarea>要素を取得
+    var textArea = document.getElementById('{{ form.content.id_for_label }}');
+    // EasyMDEエディタからテキストを取得して、<textarea>にセット
+    textArea.value = markdownText;
+});
 </script>
 {% endblock %}
-
