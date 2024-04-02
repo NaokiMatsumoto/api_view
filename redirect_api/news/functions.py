@@ -11,7 +11,8 @@ def scrape_articles(news_source, shown=True):
 
     for link in article_links:
         article_url = link['href']
-        article_title = link.text.strip()
+        article_title = link.text.strip() if link.text.strip() else article_url
+        
         article_host = urlparse(article_url).hostname
         if not article_url:
             continue
