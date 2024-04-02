@@ -17,7 +17,8 @@ def scrape_articles(news_source, shown=True):
             continue
         if article_url in processed_urls:
             continue
-        article_url = f"https://{news_source.host}{article_url}"
+        if article_host is None:
+            article_url = f"https://{news_source.host}{article_url}"
         processed_urls.add(article_url)
 
         if NewsArticle.objects.filter(url=article_url).exists():
