@@ -8,7 +8,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-
+from calendar import monthrange
+from django.utils import timezone
 
 class NewsSourceListRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
@@ -16,7 +17,7 @@ class NewsSourceListRedirectView(LoginRequiredMixin, RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         today = date.today()
-        return reverse('news_list', kwargs={
+        return reverse('news:news_list', kwargs={
             'year': today.year,
             'month': today.month,
             'day': today.day
@@ -26,16 +27,68 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
     model = NewsSource
     template_name = 'news/news_list.html'
     context_object_name = 'news_sources'
+    published_at = None
+    
+    def adjust_date(self, year, month, day):
+        # 0日の場合は、前月（前年）に移動する
+        _, last_day = monthrange(year, month)
+        if day == 0:
+            month, year, day = self.move_to_previous_month(month, year)
+
+        # last_day日以上の場合は、翌月（翌年）に移動する
+        elif day > last_day:
+            month, year, day = self.move_to_next_month(month, year)
+
+        # 無効な日付の場合は、適切な日付に調整する
+        try:
+            published_at = datetime(year, month, day)
+        except ValueError:
+            _, last_day = monthrange(year, month)
+            day = min(day, last_day)
+            published_at = datetime(year, month, day)
+
+        # 未来の日付の場合は、Noneを返す
+        if published_at.date() > timezone.now().date():
+            return None
+
+        return year, month, day
+
+    def move_to_previous_month(self, month, year):
+        month -= 1
+        if month == 0:
+            year -= 1
+            month = 12
+        _, last_day = monthrange(year, month)
+        return month, year, last_day
+
+    def move_to_next_month(self, month, year):
+        month += 1
+        if month == 13:
+            year += 1
+            month = 1
+        return month, year, 1
+
+    def redirect_to_current_date(self):
+        current_date = timezone.now().date()
+        return redirect(reverse('news_list', args=[current_date.year, current_date.month, current_date.day]))
+
 
     def get_queryset(self):
-        year = self.kwargs['year']
-        month = self.kwargs['month']
-        day = self.kwargs['day']
-        published_at = datetime(int(year), int(month), int(day))
+        year = int(self.kwargs['year'])
+        month = int(self.kwargs['month'])
+        day = int(self.kwargs['day'])
+        adjusted_date = self.adjust_date(year, month, day)
+        if adjusted_date is None:
+            return self.redirect_to_current_date()
+
+        year, month, day = adjusted_date
+        
+        self.published_at = datetime(year, month, day)
+
         queryset = super().get_queryset().prefetch_related(
             Prefetch(
                 'newsarticle_set',
-                queryset=NewsArticle.objects.filter(shown=True, published_at=published_at),
+                queryset=NewsArticle.objects.filter(shown=True, published_at=self.published_at),
                 to_attr='published_articles'
             )
         )
@@ -43,11 +96,9 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['published_at'] = datetime(
-            int(self.kwargs['year']),
-            int(self.kwargs['month']),
-            int(self.kwargs['day'])
-        )
+        if self.published_at is None:
+            return self.redirect_to_current_date()
+        context['published_at'] = self.published_at
         return context
 
 

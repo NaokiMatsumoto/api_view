@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-4 memo-content">
+    <h2>メモを作成</h2>
+    <form method="post" class="form">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.title.label_tag }}
+            {{ form.title|add_class:"form-control" }}
+        </div>
+        <div class="form-group">
+            {{ form.content.label_tag }}
+            {{ form.content|add_class:"form-control" }}
+        </div>
+        <button type="submit" class="btn btn-success">保存</button>
+    </form>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    var easyMDE = new EasyMDE({element: document.getElementById('{{ form.content.id_for_label }}')});
+</script>
+{% endblock %}

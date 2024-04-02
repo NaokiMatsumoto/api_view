@@ -96,7 +96,7 @@ $(document).ready(function() {
         addClickedClass.call(this, link);
     });
 
-    $('a:not(.list-group-item, .card-title a, .date-navigation a)').click(function(event) {
+    $('a:not(.list-group-item, .card-title a, .date-navigation a, .navbar-nav a)').click(function(event) {
         event.preventDefault();
         var link = $(this).attr('href');
         if (!clickedLinks.hasOwnProperty(link)) {

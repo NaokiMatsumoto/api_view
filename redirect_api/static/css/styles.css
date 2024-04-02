@@ -35,7 +35,7 @@ a.clicked {
 }
 .sticky-sidebar {
     position: fixed;
-    top: 0;
+    top: 56px; /* ナビゲーションバーの高さに合わせて調整 */
     left: 0;
     bottom: 0;
     width: 25%;
@@ -46,5 +46,9 @@ a.clicked {
 }
 .main-content {
     margin-left: 25%;
+    padding: 20px;
+    margin-top: 56px;
+}
+.memo-content {
     padding: 20px;
 }

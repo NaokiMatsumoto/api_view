@@ -11,11 +11,11 @@
             </div>
         </div>
         <div class="col-md-9 main-content">
-            <h1 class="mb-4">News Sources and Articles</h1>
+            <h1 class="mb-4">News List</h1>
             <div class="date-navigation">
-                <a href="{% url 'news_list' published_at.year published_at.month published_at.day|add:'-1' %}" class="btn btn-secondary">&lt;</a>
+                <a href="{% url 'news:news_list' published_at.year published_at.month published_at.day|add:'-1' %}" class="btn btn-secondary">&lt;</a>
                 <input type="text" id="datePicker" class="form-control" value="{{ published_at|date:'Y-m-d' }}">
-                <a href="{% url 'news_list' published_at.year published_at.month published_at.day|add:'1' %}" class="btn btn-secondary">&gt;</a>
+                <a href="{% url 'news:news_list' published_at.year published_at.month published_at.day|add:'1' %}" class="btn btn-secondary">&gt;</a>
             </div>
             {% for news_source in news_sources %}
                 <div class="card mb-4" id="news-source-{{ forloop.counter }}">
@@ -42,11 +42,11 @@
         </div>
     </div>
 
-    <form id="hideForm" method="post" action="{% url 'hide_articles' published_at.year published_at.month published_at.day %}">
+    <form id="hideForm" method="post" action="{% url 'news:hide_articles' published_at.year published_at.month published_at.day %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-primary hide-button" id="hideButton">記事を隠す</button>
     </form>
 {% endblock %}
 {% block script %}
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/news.js' %}"></script>
 {% endblock %}

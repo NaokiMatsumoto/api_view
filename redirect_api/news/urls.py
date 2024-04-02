@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import NewsSourceListView, hide_articles, NewsSourceListRedirectView
 
+app_name = 'news'
+
 urlpatterns = [
     path('', NewsSourceListRedirectView.as_view(), name='news_list_redirect'),
     path('<int:year>/<int:month>/<int:day>/', NewsSourceListView.as_view(), name='news_list'),
