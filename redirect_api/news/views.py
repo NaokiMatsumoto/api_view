@@ -79,9 +79,10 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         day = int(self.kwargs['day'])
         adjusted_date = self.adjust_date(year, month, day)
         if adjusted_date is None:
-            return self.redirect_to_current_date()
-
-        year, month, day = adjusted_date
+            datetime_now = timezone.now()
+            year, month, day = datetime_now.year, datetime_now.month, datetime_now.day
+        else:
+            year, month, day = adjusted_date
         
         self.published_at = datetime(year, month, day)
 
@@ -97,8 +98,9 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.published_at is None:
-            return self.redirect_to_current_date()
-        context['published_at'] = self.published_at
+            context['published_at'] = timezone.now().date()
+        else:
+            context['published_at'] = self.published_at
         return context
 
 
