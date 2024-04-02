@@ -48,7 +48,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
             published_at = datetime(year, month, day)
 
         # 未来の日付の場合は、Noneを返す
-        if published_at.date() > timezone.now().date():
+        if published_at.date() > datetime.now().date():
             return None
 
         return year, month, day
@@ -85,7 +85,6 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
             year, month, day = adjusted_date
         
         self.published_at = datetime(year, month, day)
-
         queryset = super().get_queryset().prefetch_related(
             Prefetch(
                 'newsarticle_set',
