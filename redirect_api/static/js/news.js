@@ -2,38 +2,28 @@ $(document).ready(function() {
     var hideButton = $('#hideButton');
     var checkboxes = $('input[type="checkbox"]');
     var hideForm = $('#hideForm');
-
+    
     function updateHideButtonVisibility() {
         var checkedCount = checkboxes.filter(':checked').length;
         hideButton.toggleClass('show', checkedCount > 0);
     }
 
-    $(document).on('mousedown', '.list-group-item', function(e) {
-        // チェックボックスまたはそのラベルがクリックされた場合は、デフォルトの動作を許可する
-        if ($(e.target).is('a')) {
-            return; // この場合は、以下のロジックを実行せずに早期に関数から抜ける
-        }
-        
-        // アンカータグがクリックされた場合は、デフォルトの振る舞いを阻害しない
-        e.preventDefault(); // これにより、アンカー以外の要素がクリックされた場合にのみデフォルト動作を阻害する
-        var checkbox = $(this).find('.hide-checkbox');
-        if(checkbox.is(':checked')){
-            checkbox.prop('checked', false).attr('value', 'false'); // チェックボックスの状態を切り替える
-        }else{
-            checkbox.prop('checked', true).attr('value', 'true'); // チェックボックスの状態を切り替える
-        }
-        // ここでupdateHideButtonVisibilityを呼び出す
-        updateHideButtonVisibility();
-    });
     
+    function handleCheckboxClick(e) {
+        if ($(e.target).is('a')) {
+            return;
+        }
+        e.preventDefault();
+        var checkbox = $(this);
+        checkbox.prop('checked', !checkbox.is(':checked')).attr('value', checkbox.is(':checked'));
+        updateHideButtonVisibility();
+    }
 
-
-    hideForm.submit(function(event) {
+    function handleHideFormSubmit(event) {
         event.preventDefault();
-        var selectedArticleIds = [];
-        checkboxes.filter(':checked').each(function() {
-            selectedArticleIds.push($(this).data('article-id'));
-        });
+        var selectedArticleIds = checkboxes.filter(':checked').map(function() {
+            return $(this).data('article-id');
+        }).get();
 
         $('<input>').attr({
             type: 'hidden',
@@ -42,43 +32,45 @@ $(document).ready(function() {
         }).appendTo(hideForm);
 
         hideForm.off('submit').submit();
-    });
-
-    $('#datePicker').datepicker({
-        format: 'yyyy-mm-dd',
-        autoclose: true
-    }).on('changeDate', function(e) {
-        var selectedDate = e.format();
-        var dateArray = selectedDate.split('-');
-        var year = dateArray[0];
-        var month = dateArray[1];
-        var day = dateArray[2];
-        window.location.href = `/news/${year}/${month}/${day}/`;
-    });
-
-    var clickedLinks = JSON.parse(localStorage.getItem('clickedLinks')) || {};
-    var currentDate = new Date();
-
-    if (Array.isArray(clickedLinks)) {
-        clickedLinks = clickedLinks.reduce(function(obj, link) {
-            obj[link] = {
-                expirationDate: new Date().toISOString()
-            };
-            return obj;
-        }, {});
-        localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
     }
 
-    Object.keys(clickedLinks).forEach(function(link) {
-        if (new Date(clickedLinks[link].expirationDate) < currentDate) {
-            delete clickedLinks[link];
-        }
-    });
+    function initDatePicker() {
+        $('#datePicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true
+        }).on('changeDate', function(e) {
+            var selectedDate = e.format();
+            var [year, month, day] = selectedDate.split('-');
+            window.location.href = `/news/${year}/${month}/${day}/`;
+        });
+    }
 
-    localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
+    function getClickedLinks() {
+        var clickedLinks = JSON.parse(localStorage.getItem('clickedLinks')) || {};
+        var currentDate = new Date();
+
+        if (Array.isArray(clickedLinks)) {
+            clickedLinks = clickedLinks.reduce(function(obj, link) {
+                obj[link] = {
+                    expirationDate: new Date().toISOString()
+                };
+                return obj;
+            }, {});
+            localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
+        }
+
+        Object.keys(clickedLinks).forEach(function(link) {
+            if (new Date(clickedLinks[link].expirationDate) < currentDate) {
+                delete clickedLinks[link];
+            }
+        });
+
+        localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
+        return clickedLinks;
+    }
 
     function addClickedClass(link) {
-        if(!link.startsWith('http')){
+        if (!link.startsWith('http')) {
             return;
         }
         if (clickedLinks.hasOwnProperty(link)) {
@@ -86,17 +78,7 @@ $(document).ready(function() {
         }
     }
 
-    $('a').each(function() {
-        var link = $(this).attr('href');
-        addClickedClass.call(this, link);
-    });
-
-    $('a:not(.card-title a)').each(function() {
-        var link = $(this).attr('href');
-        addClickedClass.call(this, link);
-    });
-
-    $('a:not(.list-group-item, .card-title a, .date-navigation a, .navbar-nav a)').click(function(event) {
+    function handleLinkClick(event) {
         event.preventDefault();
         var link = $(this).attr('href');
         if (!clickedLinks.hasOwnProperty(link)) {
@@ -111,9 +93,9 @@ $(document).ready(function() {
         }
         $(this).addClass('clicked');
         window.open(link, '_blank');
-    });
+    }
 
-    $('.list-group-item').click(function(e) {
+    function handleListGroupItemScroll(e) {
         e.preventDefault();
         var targetId = $(this).data('target');
         if (targetId) {
@@ -122,6 +104,60 @@ $(document).ready(function() {
                 scrollTop: targetPosition
             }, 500);
         }
-    });
+    }
 
+    function toggleFavorite() {
+        var articleId = $(this).data('article-id');
+        var button = $(this);
+      
+        sendToggleFavoriteRequest(articleId, button);
+      }
+      
+      function sendToggleFavoriteRequest(articleId, button) {
+        console.log('{{ csrf_token }}')
+        $.ajax({
+          url: '/news/toggle_favorite/' + articleId + '/',
+          method: 'POST',
+          data: {
+            'csrfmiddlewaretoken': csrf_token,
+          },
+          success: function(response) {
+            handleToggleFavoriteSuccess(response, button);
+          },
+          error: handleToggleFavoriteError
+        });
+      }
+      
+      function handleToggleFavoriteSuccess(response, button) {
+        var icon = button.find('i');
+        if (response.is_favorite) {
+          icon.removeClass('text-muted').addClass('text-warning');
+        } else {
+          icon.removeClass('text-warning').addClass('text-muted');
+        }
+      }
+      
+      function handleToggleFavoriteError(xhr, status, error) {
+        console.error(error);
+      }
+
+    var clickedLinks = getClickedLinks();
+
+    $('.hide-checkbox').on('mousedown', handleCheckboxClick);
+    hideForm.submit(handleHideFormSubmit);
+    initDatePicker();
+    $('a').each(function() {
+        var link = $(this).attr('href');
+        addClickedClass.call(this, link);
+    });
+    $('a:not(.card-title a)').each(function() {
+        var link = $(this).attr('href');
+        addClickedClass.call(this, link);
+    });
+    $('a:not(.list-group-item, .card-title a, .date-navigation a, .navbar-nav a)').click(handleLinkClick);
+    $('.list-group-item').click(handleListGroupItemScroll);
+
+    $(document).ready(function() {
+        $('.toggle-favorite').click(toggleFavorite);
+    });
 });

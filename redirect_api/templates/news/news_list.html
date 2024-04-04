@@ -27,6 +27,9 @@
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input hide-checkbox" id="article-{{ article.id }}" data-article-id="{{ article.id }}">
                                     <label class="form-check-label" for="article-{{ article.id }}"></label>
+                                    <button type="button" class="btn btn-sm toggle-favorite mr-2" data-article-id="{{ article.id }}">
+                                        <i class="fas fa-star {% if article.is_favorite %}text-warning{% else %}text-muted{% endif %}"></i>
+                                    </button>
                                 </div>
                                 <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
                             </li>
@@ -46,6 +49,9 @@
         {% csrf_token %}
         <button type="submit" class="btn btn-primary hide-button" id="hideButton">記事を隠す</button>
     </form>
+    <script>
+        var csrf_token = '{{ csrf_token }}';
+    </script>
 {% endblock %}
 {% block script %}
     <script src="{% static 'js/news.js' %}"></script>

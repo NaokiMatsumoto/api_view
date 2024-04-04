@@ -49,6 +49,6 @@ a.clicked {
     padding: 20px;
     margin-top: 56px;
 }
-.memo-content {
+.memo-content, .favourite-content {
     padding: 20px;
 }

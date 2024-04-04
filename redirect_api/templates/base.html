@@ -18,7 +18,8 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"> <a class="nav-link" href="{% url 'news:news_list_redirect' %}">ニュース一覧</a> </li>
+                    <li class="nav-item"> <a class="nav-link" href="{% url 'news:news_list_redirect' %}">ニュース</a> </li>
+                    <li class="nav-item"> <a class="nav-link" href="{% url 'news:favorite_list' %}">お気に入り</a> </li>
                     <li class="nav-item"> <a class="nav-link" href="{% url 'memo:memo_list' %}">メモ</a> </li>
                     <li class="nav-item"> <a class="nav-link" href="#">SNS</a> </li>
                     <li class="nav-item"> <a class="nav-link" href="#">日記</a> </li>
@@ -54,6 +55,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
     <!-- EasyMDE JS -->
     <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script src="https://kit.fontawesome.com/06393a1ced.js" crossorigin="anonymous"></script>
     {% block script %}{% endblock %}
 </body>
 </html>
