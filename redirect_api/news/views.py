@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from calendar import monthrange
 from django.utils import timezone
 from django.http import JsonResponse
-from .models import NewsSource, NewsArticle, Favorite
+from .models import NewsSource, NewsArticle, Favorite, Region
 from datetime import datetime, date
 
 
@@ -31,6 +31,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
     template_name = 'news/news_list.html'
     context_object_name = 'news_sources'
     published_at = None
+    region_id = None
     
     def adjust_date(self, year, month, day):
         # 0日の場合は、前月（前年）に移動する
@@ -81,6 +82,8 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         month = int(self.kwargs['month'])
         day = int(self.kwargs['day'])
         adjusted_date = self.adjust_date(year, month, day)
+        self.region_id = self.kwargs.get('region_id')
+        
         if adjusted_date is None:
             datetime_now = timezone.now()
             year, month, day = datetime_now.year, datetime_now.month, datetime_now.day
@@ -98,6 +101,9 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
             )
         )
         
+        if self.region_id:
+            queryset = queryset.filter(regions__id=self.region_id).distinct()
+            
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -106,7 +112,12 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
             context['published_at'] = timezone.now().date()
         else:
             context['published_at'] = self.published_at
+        if self.region_id:
+            context['region_id'] = self.region_id
+        context['regions'] = Region.objects.all()
         return context
+
+
 class FavoriteListView(LoginRequiredMixin, ListView):
     model = Favorite
     template_name = 'news/favorite_list.html'

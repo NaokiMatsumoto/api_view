@@ -1,5 +1,11 @@
 body {
     padding: 20px;
+    font-family: "Helvetica Neue",
+    Arial,
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    Meiryo,
+    sans-serif;
 }
 h2 {
     margin-top: 30px;
@@ -51,4 +57,19 @@ a.clicked {
 }
 .memo-content, .favourite-content {
     padding: 20px;
+}
+.region-filter .form-select {
+    width: 100%;
+    height: 60px;
+    padding-left: 10px;
+    font-size: 18px;
+    color: #333;
+    background-color: #ffffff;
+    border-color: #ced4da;
+    border-radius: 5px;
+}
+.thick-hr {
+    border: none;
+    border-top: 3px solid #ccc;
+    margin: 20px 0;
 }
