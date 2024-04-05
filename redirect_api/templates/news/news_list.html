@@ -7,7 +7,7 @@
             <div class="region-filter">
                 <select id="region-select" class="form-select" onchange="location = this.value;">
                     <option value="{% url 'news:news_list' year=published_at.year month=published_at.month day=published_at.day %}"
-                            {% if not region_id %}selected{% endif %}>すべて</option>
+                            {% if not region_id %}selected{% endif %}>すべての地域</option>
                     {% for region in regions %}
                     <option value="{% url 'news:news_list_by_region' year=published_at.year month=published_at.month day=published_at.day region_id=region.id %}"
                             {% if region_id == region.id %}selected{% endif %}>
