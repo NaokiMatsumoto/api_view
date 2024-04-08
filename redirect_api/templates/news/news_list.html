@@ -24,7 +24,6 @@
             </div>
         </div>
         <div class="col-md-9 main-content">
-            
             <div class="date-navigation">
                 <a href="{% url 'news:news_list' published_at.year published_at.month published_at.day|add:'-1' %}" class="btn btn-secondary">&lt;</a>
                 <input type="text" id="datePicker" class="form-control" value="{{ published_at|date:'Y-m-d' }}">
@@ -37,13 +36,12 @@
                         <ul class="list-group">
                             {% for article in news_source.published_articles %}
                             <li class="list-group-item d-flex justify-content-between align-items-center article-item" data-article-id="{{ article.id }}">
-                                <div class="form-check">
-                                    <label class="form-check-label" for="article-{{ article.id }}"></label>
+                                <div class="d-flex align-items-center">
                                     <button type="button" class="btn btn-sm toggle-favorite mr-2" data-article-id="{{ article.id }}">
-                                        <i class="fas fa-star {% if article.is_favorite %}text-warning{% else %}text-muted{% endif %}"></i>
+                                            <i class="fas fa-star {% if article.is_favorite %}text-warning{% else %}text-muted{% endif %}"></i>
                                     </button>
+                                    <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
                                 </div>
-                                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
                                 <div class="comment-section" comment-article-id="{{ article.id }}">
                                     <div class="comment-form">
                                         <textarea class="form-control comment-textarea" rows="6">{% if article.comment %}{{ article.comment }}{% endif %}</textarea>
