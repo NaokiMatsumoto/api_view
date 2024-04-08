@@ -1,5 +1,5 @@
 from django.views.generic import ListView, RedirectView, View
-from django.db.models import Prefetch, Exists, OuterRef
+from django.db.models import Prefetch, Exists, OuterRef, Subquery
 from django.shortcuts import get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from calendar import monthrange
 from django.utils import timezone
 from django.http import JsonResponse
-from .models import NewsSource, NewsArticle, Favorite, Region
+from .models import NewsSource, NewsArticle, Favorite, Region, Comment
 from datetime import datetime, date
 
 
@@ -92,10 +92,16 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         
         self.published_at = datetime(year, month, day)
         queryset = super().get_queryset().prefetch_related(
-            Prefetch(
-                'newsarticle_set',
+        Prefetch(
+            'newsarticle_set',
                 queryset=NewsArticle.objects.filter(shown=True, published_at=self.published_at).annotate(
-                    is_favorite=Exists(Favorite.objects.filter(user=self.request.user, article=OuterRef('pk')))
+                    is_favorite=Exists(Favorite.objects.filter(user=self.request.user, article=OuterRef('pk'))),
+                    comment=Subquery(
+                        Comment.objects.filter(
+                            user=self.request.user,
+                            article=OuterRef('pk')
+                        ).values('content')[:1]
+                    )
                 ),
                 to_attr='published_articles'
             )
@@ -125,7 +131,15 @@ class FavoriteListView(LoginRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
-        return Favorite.objects.filter(user=self.request.user).order_by('-article__published_at')
+        return Favorite.objects.filter(user=self.request.user).annotate(
+            comment=Subquery(
+                Comment.objects.filter(
+                    user=self.request.user,
+                    article=OuterRef('article_id')
+                ).values('content')[:1]
+            )
+        ).order_by('-article__published_at')
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -156,3 +170,25 @@ def hide_articles(request, year, month, day):
         'month': month,
         'day': day
     }))
+
+class CommentCreateUpdateView(LoginRequiredMixin, View):
+    
+    def post(self, request, article_id):
+        content = request.POST.get('content')
+        if content:
+            comment, created = Comment.objects.update_or_create(
+                article_id=article_id,
+                user=request.user,
+                defaults={'content': content}
+            )
+            action = 'create' if created else 'update'
+            return JsonResponse({'success': True, 'action': action})
+        else:
+            return JsonResponse({'success': False, 'error': 'コメント内容がありません。'})
+        
+        
+class CommentDeleteView(LoginRequiredMixin, View):
+    def post(self, request, article_id):
+        comment = get_object_or_404(Comment, article_id=article_id, user=request.user)
+        comment.delete()
+        return JsonResponse({'success': True})

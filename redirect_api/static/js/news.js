@@ -1,3 +1,99 @@
+function deleteComment(articleId) {
+    $.ajax({
+        url: '/news/comment/delete/' + articleId + '/',
+        method: 'POST',
+        data: {
+            'csrfmiddlewaretoken': csrf_token
+        },
+        success: function(response) {
+            console.log("Success callback executed");
+            if (response.success) {
+                console.log("Response success is true");
+                // コメントを削除
+                var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+                var commentTextarea = commentSection.find('.comment-textarea');
+                commentTextarea.val('');
+                commentSection.find('.delete-comment').remove();
+                commentSection.find('.save-comment').text('保存');
+            } 
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error in Ajax request:", textStatus, errorThrown);
+        }    
+    });
+}
+
+function initDatePicker() {
+    $('#datePicker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    }).on('changeDate', function(e) {
+        var selectedDate = e.format();
+        var [year, month, day] = selectedDate.split('-');
+        window.location.href = `/news/${year}/${month}/${day}/`;
+    });
+}
+
+function saveComment(articleId, content) {
+    $.ajax({
+        url: '/news/comment/' + articleId + '/',
+        method: 'POST',
+        data: {
+            'content': content,
+            'csrfmiddlewaretoken': csrf_token
+        },
+        success: function(response) {
+            // var newComment = '<div class="comment" data-comment-id="' + response.comment_id + '">' +
+            //                          '<p>' + content + '</p>' +
+            //                          '<button type="button" class="btn btn-sm btn-primary edit-comment" data-article-id="' + articleId + '" data-comment-id="' + response.comment_id + '">編集</button>' +
+            //                          '<button type="button" class="btn btn-sm btn-danger delete-comment" data-comment-id="' + response.comment_id + '">削除</button>' +
+            //                          '</div>';
+            // $('.comments').append(newComment);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error in Ajax request:", textStatus, errorThrown);
+        } 
+    });
+}
+
+function toggleCommentSection(commentIcon) {
+    var articleId = commentIcon.data('article-id');
+    var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+
+    if (commentSection.hasClass('show')) {
+        hideCommentSection(articleId);
+    } else {
+        showCommentSection(articleId);
+    }
+}
+
+function showCommentSection(articleId) {
+    var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+    var articleList = $('.article-item[data-article-id="' + articleId + '"]');
+
+    $('.comment-section.show').removeClass('show');
+    commentSection.css({
+        position: 'absolute',
+        top: articleList.outerHeight(),
+        right: 0,
+        width: articleList.outerWidth() * 2 / 3,
+    }).addClass('show');
+}
+
+function hideCommentSection(articleId) {
+    var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+    var articleList = $('.article-item[data-article-id="' + articleId + '"]');
+
+    commentSection.removeClass('show');
+    setTimeout(function() {
+        commentSection.css({
+            top: articleList.outerHeight(),
+            right: 0,
+            width: articleList.outerWidth() * 2 / 3,
+        });
+    }, 300);
+}
+
 $(document).ready(function() {
     var hideButton = $('#hideButton');
     var checkboxes = $('input[type="checkbox"]');
@@ -32,17 +128,6 @@ $(document).ready(function() {
         }).appendTo(hideForm);
 
         hideForm.off('submit').submit();
-    }
-
-    function initDatePicker() {
-        $('#datePicker').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true
-        }).on('changeDate', function(e) {
-            var selectedDate = e.format();
-            var [year, month, day] = selectedDate.split('-');
-            window.location.href = `/news/${year}/${month}/${day}/`;
-        });
     }
 
     function getClickedLinks() {
@@ -141,6 +226,8 @@ $(document).ready(function() {
         console.error(error);
       }
 
+    
+
     var clickedLinks = getClickedLinks();
 
     $('.hide-checkbox').on('mousedown', handleCheckboxClick);
@@ -159,5 +246,24 @@ $(document).ready(function() {
 
     $(document).ready(function() {
         $('.toggle-favorite').click(toggleFavorite);
+    });
+
+    $('.save-comment').on('click', function() {
+        var articleId = $(this).data('article-id');
+        var content = $(this).closest('.comment-form').find('.comment-textarea').val();
+        saveComment(articleId, content);
+        hideCommentSection(articleId);
+    });
+
+    $(document).on('click', '.delete-comment', function() {
+        var articleId = $(this).data('article-id');
+        if (confirm('このコメントを削除してもよろしいですか？')) {
+            deleteComment(articleId);
+        }
+    });
+    
+    $(document).on('click', '.comment-icon', function(e) {
+        e.stopPropagation();
+        toggleCommentSection($(this));
     });
 });

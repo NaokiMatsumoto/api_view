@@ -1,3 +1,61 @@
+function toggleCommentSection(commentIcon) {
+  var articleId = commentIcon.data('article-id');
+  var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+  if (commentSection.hasClass('show')) {
+      hideCommentSection(articleId);
+  } else {
+      showCommentSection(articleId);
+  }
+}
+
+function showCommentSection(articleId) {
+  var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+  var favoriteItem = $('.favorite-item[data-article-id="' + articleId + '"]');
+
+  $('.comment-section.show').removeClass('show');
+  commentSection.css({
+      position: 'absolute',
+      top: favoriteItem.outerHeight() / 2,
+      right: 0,
+      width: favoriteItem.outerWidth() * 2 / 3,
+  }).addClass('show');
+}
+
+function hideCommentSection(articleId) {
+  var commentSection = $('.comment-section[comment-article-id="' + articleId + '"]');
+  var favoriteItem = $('.favorite-item[data-article-id="' + articleId + '"]');
+  commentSection.removeClass('show');
+  setTimeout(function() {
+      commentSection.css({
+        top: favoriteItem.outerHeight() / 2,
+        right: 0,
+        width: favoriteList.outerWidth() * 2 / 3,
+      });
+  }, 300);
+}
+
+function saveComment(articleId, content) {
+  $.ajax({
+      url: '/news/comment/' + articleId + '/',
+      method: 'POST',
+      data: {
+          'content': content,
+          'csrfmiddlewaretoken': csrf_token
+      },
+      success: function(response) {
+          // var newComment = '<div class="comment" data-comment-id="' + response.comment_id + '">' +
+          //                          '<p>' + content + '</p>' +
+          //                          '<button type="button" class="btn btn-sm btn-primary edit-comment" data-article-id="' + articleId + '" data-comment-id="' + response.comment_id + '">編集</button>' +
+          //                          '<button type="button" class="btn btn-sm btn-danger delete-comment" data-comment-id="' + response.comment_id + '">削除</button>' +
+          //                          '</div>';
+          // $('.comments').append(newComment);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          console.error("Error in Ajax request:", textStatus, errorThrown);
+      } 
+  });
+}
+
 $(document).ready(function() {
     function toggleFavorite() {
         var articleId = $(this).data('article-id');
@@ -35,5 +93,16 @@ $(document).ready(function() {
       }
     $(document).ready(function() {
         $('.toggle-favorite').click(toggleFavorite);
+    });
+    
+    $(document).on('click', '.comment-icon', function(e) {
+        e.stopPropagation();
+        toggleCommentSection($(this));
+    });
+    $('.save-comment').on('click', function() {
+      var articleId = $(this).data('article-id');
+      var content = $(this).closest('.comment-form').find('.comment-textarea').val();
+      saveComment(articleId, content);
+      hideCommentSection(articleId);
     });
 });

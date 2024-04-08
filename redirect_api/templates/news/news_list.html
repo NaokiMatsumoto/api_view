@@ -38,13 +38,25 @@
                             {% for article in news_source.published_articles %}
                             <li class="list-group-item d-flex justify-content-between align-items-center article-item" data-article-id="{{ article.id }}">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input hide-checkbox" id="article-{{ article.id }}" data-article-id="{{ article.id }}">
                                     <label class="form-check-label" for="article-{{ article.id }}"></label>
                                     <button type="button" class="btn btn-sm toggle-favorite mr-2" data-article-id="{{ article.id }}">
                                         <i class="fas fa-star {% if article.is_favorite %}text-warning{% else %}text-muted{% endif %}"></i>
                                     </button>
                                 </div>
                                 <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                                <div class="comment-section" comment-article-id="{{ article.id }}">
+                                    <div class="comment-form">
+                                        <textarea class="form-control comment-textarea" rows="6">{% if article.comment %}{{ article.comment }}{% endif %}</textarea>
+                                        <div class="comment-form-footer">
+                                            <button type="button" class="btn btn-sm btn-primary save-comment" data-article-id="{{ article.id }}">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-icon" data-article-id="{{ article.id }}">
+                                    <i class="far fa-comment"></i>
+                                </div>
                             </li>
                             {% empty %}
                             <li class="list-group-item">No articles found for this news source on {{ published_at|date:"F j, Y" }}.</li>

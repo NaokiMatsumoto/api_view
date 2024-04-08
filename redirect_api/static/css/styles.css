@@ -73,3 +73,56 @@ a.clicked {
     border-top: 3px solid #ccc;
     margin: 20px 0;
 }
+.comment-icon {
+    cursor: pointer;
+}
+
+.comment-icon i {
+    font-size: 1.2em;
+}
+
+
+.comment-section {
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    visibility: hidden;
+    transition: visibility 0.5s ease, opacity 0.5s ease;
+    pointer-events: none;
+    overflow-y: auto; /* この行を追加 */
+}
+
+.comment-section.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+.comment-form {
+    position: relative;
+}
+
+.comment-form-footer {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+}
+
+.save-comment {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
+    color: #333;
+}
+
+.save-comment:hover {
+    background-color: #d0d0d0;
+    border-color: #d0d0d0;
+}
+
+.favorite-item {
+    position: relative;
+  }
+  

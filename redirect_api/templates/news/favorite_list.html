@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <div class="container mt-4 memo-content">
   
   {% regroup favorites by article.published_at as favorite_list %}
@@ -11,15 +12,29 @@
     <h2 class="mb-3">{{ published_at }}</h2>
     <ul class="list-unstyled">
       {% for favorite in favorites %}
-      <li class="mb-3">
-        <div class="d-flex align-items-center">
+      <li class="mb-3 favorite-item" data-article-id="{{ favorite.article.id }}">
+        <div class="d-flex align-items-start">
           <button type="button" class="btn btn-sm toggle-favorite mr-2" data-article-id="{{ favorite.article.id }}">
             <i class="fas fa-star {% if favorite.article.id in favorite_article_ids %}text-warning{% else %}text-muted{% endif %}"></i>
           </button>
-          <div>
-            <a href="{{ favorite.article.url }}" target="_blank" class="text-dark">{{ favorite.article.title }}</a>
-            <br>
-            <small class="text-muted">({{ favorite.article.news_source.name }})</small>
+          <div class="d-flex justify-content-between align-items-start flex-grow-1">
+            <div>
+              <p><a href="{{ favorite.article.url }}" target="_blank" class="text-dark">{{ favorite.article.title }}</a></p>
+              <small class="text-muted">({{ favorite.article.news_source.name }})</small>
+            </div>
+            <div class="comment-section" comment-article-id="{{ favorite.article.id }}">
+              <div class="comment-form">
+                <textarea class="form-control comment-textarea" rows="6">{% if favorite.comment %}{{ favorite.comment }}{% endif %}</textarea>
+                <div class="comment-form-footer">
+                  <button type="button" class="btn btn-sm btn-primary save-comment" data-article-id="{{ favorite.article.id }}">
+                    <i class="fas fa-check"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="comment-icon" data-article-id="{{ favorite.article.id }}">
+              <i class="far fa-comment"></i>
+            </div>
           </div>
         </div>
       </li>

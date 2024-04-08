@@ -1,6 +1,10 @@
 from django.urls import path
-from .views import NewsSourceListView, hide_articles, NewsSourceListRedirectView, ToggleFavoriteView, FavoriteListView
-
+from .views import (
+    NewsSourceListView, hide_articles, 
+    NewsSourceListRedirectView, ToggleFavoriteView, 
+    FavoriteListView, CommentCreateUpdateView,
+    CommentDeleteView,
+)
 app_name = 'news'
 
 urlpatterns = [
@@ -10,4 +14,6 @@ urlpatterns = [
     path('hide-articles/<int:year>/<int:month>/<int:day>/', hide_articles, name='hide_articles'),
     path('toggle_favorite/<int:article_id>/', ToggleFavoriteView.as_view(), name='toggle_favorite'),
     path('favorites/', FavoriteListView.as_view(), name='favorite_list'),
+    path('comment/<int:article_id>/', CommentCreateUpdateView.as_view(), name='comment_create_update'),
+    path('comment/delete/<int:article_id>/', CommentDeleteView.as_view(), name='comment_delete'),
 ]
