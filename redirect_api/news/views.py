@@ -92,8 +92,8 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         
         self.published_at = datetime(year, month, day)
         queryset = super().get_queryset().prefetch_related(
-        Prefetch(
-            'newsarticle_set',
+            Prefetch(
+                'newsarticle_set',
                 queryset=NewsArticle.objects.filter(shown=True, published_at=self.published_at).annotate(
                     is_favorite=Exists(Favorite.objects.filter(user=self.request.user, article=OuterRef('pk'))),
                     comment=Subquery(
@@ -101,9 +101,15 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
                             user=self.request.user,
                             article=OuterRef('pk')
                         ).values('content')[:1]
-                    )
+                    ),
                 ),
                 to_attr='published_articles'
+            )
+        ).annotate(
+            representative_region=Subquery(
+                NewsSource.regions.through.objects.filter(
+                    newssource_id=OuterRef('pk')
+                ).values('region__japanese_name')[:1]
             )
         )
         

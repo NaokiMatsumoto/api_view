@@ -22,6 +22,9 @@ def scrape_articles(news_source, shown=True):
             continue
         if article_host is None:
             article_url = f"https://{news_source.host}{article_url}"
+        if article_host == 'ideasforgood.jp' and article_title.isdigit():
+            continue
+        
         processed_urls.add(article_url)
 
         if NewsArticle.objects.filter(url=article_url).exists():
