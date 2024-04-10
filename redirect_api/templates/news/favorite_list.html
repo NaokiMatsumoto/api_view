@@ -20,7 +20,7 @@
           <div class="d-flex justify-content-between align-items-start flex-grow-1">
             <div>
               <p><a href="{{ favorite.article.url }}" target="_blank" class="text-dark">{{ favorite.article.title }}</a></p>
-              <small class="text-muted">({{ favorite.article.news_source.name }})</small>
+              <small class="text-muted">{{ favorite.article.news_source.name }} ({{ favorite.region_name }})</small>
             </div>
             <div class="comment-section" comment-article-id="{{ favorite.article.id }}">
               <div class="comment-form">

@@ -143,6 +143,11 @@ class FavoriteListView(LoginRequiredMixin, ListView):
                     user=self.request.user,
                     article=OuterRef('article_id')
                 ).values('content')[:1]
+            ),
+            region_name=Subquery(
+                Region.objects.filter(
+                    newssource__newsarticle=OuterRef('article_id')
+                ).values('japanese_name')[:1]
             )
         ).order_by('-article__published_at')
 
