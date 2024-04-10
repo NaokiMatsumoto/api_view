@@ -43,12 +43,12 @@ function saveComment(articleId, content) {
             'csrfmiddlewaretoken': csrf_token
         },
         success: function(response) {
-            // var newComment = '<div class="comment" data-comment-id="' + response.comment_id + '">' +
-            //                          '<p>' + content + '</p>' +
-            //                          '<button type="button" class="btn btn-sm btn-primary edit-comment" data-article-id="' + articleId + '" data-comment-id="' + response.comment_id + '">編集</button>' +
-            //                          '<button type="button" class="btn btn-sm btn-danger delete-comment" data-comment-id="' + response.comment_id + '">削除</button>' +
-            //                          '</div>';
-            // $('.comments').append(newComment);
+            if (content !== '') {
+                var commentIcon = $('.comment-icon[data-article-id="' + articleId + '"]');
+                if (!commentIcon.find('.fa-comment').hasClass('text-primary')) {
+                  commentIcon.html('<i class="fas fa-comment text-primary"></i>');
+                }
+              }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             console.error("Error in Ajax request:", textStatus, errorThrown);
