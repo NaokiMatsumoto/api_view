@@ -17,14 +17,28 @@ from datetime import datetime, date
 class NewsSourceListRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
     query_string = True
+    is_startup_news = True
 
     def get_redirect_url(self, *args, **kwargs):
         today = date.today()
+        if self.is_startup_news:
+            return reverse('news:news_list_by_startup', kwargs={
+                'year': today.year,
+                'month': today.month,
+                'day': today.day,
+            },
+        )
         return reverse('news:news_list', kwargs={
             'year': today.year,
             'month': today.month,
             'day': today.day
         })
+
+class StartupNewsSourceListRedirectView(NewsSourceListRedirectView):
+    is_startup_news = True
+
+class OriginalNewsSourceListRedirectView(NewsSourceListRedirectView):
+    is_startup_news = False
 
 class NewsSourceListView(LoginRequiredMixin, ListView):
     model = NewsSource
@@ -32,6 +46,9 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
     context_object_name = 'news_sources'
     published_at = None
     region_id = None
+    is_startup_news = True
+    date_url = 'news:news_list'
+    region_url = 'news:news_list_by_region'
     
     def adjust_date(self, year, month, day):
         # 0日の場合は、前月（前年）に移動する
@@ -83,7 +100,6 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         day = int(self.kwargs['day'])
         adjusted_date = self.adjust_date(year, month, day)
         self.region_id = self.kwargs.get('region_id')
-        
         if adjusted_date is None:
             datetime_now = timezone.now()
             year, month, day = datetime_now.year, datetime_now.month, datetime_now.day
@@ -105,7 +121,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
                 ),
                 to_attr='published_articles'
             )
-        ).annotate(
+        ).filter(is_startup_news=self.is_startup_news).annotate(
             representative_region=Subquery(
                 NewsSource.regions.through.objects.filter(
                     newssource_id=OuterRef('pk')
@@ -127,7 +143,20 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         if self.region_id:
             context['region_id'] = self.region_id
         context['regions'] = Region.objects.all()
+        context['date_url'] = self.date_url
+        context['region_url'] = self.region_url
         return context
+
+class StarupNewsSourceListView(NewsSourceListView):
+    is_startup_news = True
+    date_url = 'news:news_list_by_startup'
+    region_url = 'news:news_list_by_region_and_startup'
+
+
+class OriginalNewsSourceListView(NewsSourceListView):
+    is_startup_news = False
+    date_url = 'news:news_list'
+    region_url = 'news:news_list_by_region'
 
 
 class FavoriteListView(LoginRequiredMixin, ListView):

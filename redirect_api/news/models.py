@@ -16,6 +16,7 @@ class NewsSource(models.Model):
     host = models.CharField(max_length=255, default='')
     name = models.CharField(max_length=255)
     japanese_name = models.CharField(max_length=255, default='')
+    is_startup_news = models.BooleanField(default=True)
     is_japanese_site = models.BooleanField(default=False)
 
     def __str__(self):
