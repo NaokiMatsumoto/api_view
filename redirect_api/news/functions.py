@@ -24,7 +24,7 @@ def scrape_articles(news_source, shown=True):
             article_url = f"https://{news_source.host}{article_url}"
         if article_host == 'ideasforgood.jp' and article_title.isdigit():
             continue
-        if article_host == 'weetracker.com' and article_title.startswith("Contact"):
+        if news_source.host == 'weetracker.com' and article_title.startswith("Contact"):
             continue
         
         processed_urls.add(article_url)
