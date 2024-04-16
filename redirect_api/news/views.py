@@ -12,8 +12,6 @@ from django.http import JsonResponse
 from .models import NewsSource, NewsArticle, Favorite, Region, Comment
 from datetime import datetime, date
 
-
-
 class NewsSourceListRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
     query_string = True

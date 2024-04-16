@@ -3,7 +3,7 @@
 {% block title %}News Sources and Articles{% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-md-3 sticky-sidebar">
+        <div class="col-md-3 sticky-sidebar d-none d-md-block">
             <div class="region-filter">
                 <select id="region-select" class="form-select" onchange="location = this.value;">
                     <option value="{% url date_url year=published_at.year month=published_at.month day=published_at.day %}"
@@ -23,11 +23,32 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="col-md-9 main-content">
+        <div class="col-md-9 col-12 main-content">
             <div class="date-navigation">
                 <a href="{% url date_url published_at.year published_at.month published_at.day|add:'-1' %}" class="btn btn-secondary">&lt;</a>
                 <input type="text" id="datePicker" class="form-control" value="{{ published_at|date:'Y-m-d' }}">
                 <a href="{% url date_url published_at.year published_at.month published_at.day|add:'1' %}" class="btn btn-secondary">&gt;</a>
+            </div>
+            <div class="d-md-none">
+                <div class="region-filter">
+                    <select id="region-select" class="form-select" onchange="location = this.value;">
+                        <option value="{% url date_url year=published_at.year month=published_at.month day=published_at.day %}"
+                                {% if not region_id %}selected{% endif %}>すべての地域</option>
+                        {% for region in regions %}
+                        <option value="{% url region_url year=published_at.year month=published_at.month day=published_at.day region_id=region.id %}"
+                                {% if region_id == region.id %}selected{% endif %}>
+                            {{ region.japanese_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <hr class="thick-hr">
+                <div class="news-source-list d-flex flex-wrap">
+                    {% for news_source in news_sources %}
+                        <a href="#news-source-{{ forloop.counter }}" class="list-group-item list-group-item-action" data-target="#news-source-{{ forloop.counter }}">{{ news_source.name }} ({{ news_source.representative_region }})</a>
+                    {% endfor %}
+                </div>
+                <hr>
             </div>
             {% for news_source in news_sources %}
                 <div class="card mb-4" id="news-source-{{ forloop.counter }}">
