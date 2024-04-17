@@ -129,7 +129,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         
         if self.region_id:
             queryset = queryset.filter(regions__id=self.region_id).distinct()
-            
+        queryset = queryset.order_by('representative_region')
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -176,7 +176,7 @@ class FavoriteListView(LoginRequiredMixin, ListView):
                     newssource__newsarticle=OuterRef('article_id')
                 ).values('japanese_name')[:1]
             )
-        ).order_by('-article__published_at')
+        ).order_by('-article__published_at', 'region_name')
 
 
     def get_context_data(self, **kwargs):
