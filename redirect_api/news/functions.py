@@ -1,7 +1,11 @@
 from .models import NewsSource, NewsArticle
-import requests
+import requests, re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+
+def is_date_release_string(text):
+    pattern = r'^\d{4}/\d{1,2}/\d{1,2} Release '
+    return bool(re.match(pattern, text))
 
 def scrape_articles(news_source, shown=True):
     response = requests.get(news_source.url)
@@ -27,6 +31,8 @@ def scrape_articles(news_source, shown=True):
         if news_source.host == 'weetracker.com' and article_title.startswith("Contact"):
             continue
         if news_source.host == 'kr-asia.com' and article_title.find("[email protected]") != -1:
+            continue
+        if news_source.host == 'techable.jp' and is_date_release_string(article_title):
             continue
         
         processed_urls.add(article_url)
