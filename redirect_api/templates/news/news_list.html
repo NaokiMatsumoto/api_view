@@ -19,14 +19,16 @@
             <hr class="thick-hr">
             <div class="list-group">
                 {% for news_source in news_sources %}
-                    <a href="#news-source-{{ forloop.counter }}" class="list-group-item list-group-item-action" data-target="#news-source-{{ forloop.counter }}">{{ news_source.name }} ({{ news_source.representative_region }})</a>
+                    {% if news_source.published_articles %}
+                        <a href="#news-source-{{ forloop.counter }}" class="list-group-item list-group-item-action" data-target="#news-source-{{ forloop.counter }}">{{ news_source.name }} ({{ news_source.representative_region }})</a>
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>
         <div class="col-md-9 col-12 main-content">
             <div class="date-navigation">
                 <a href="{% url date_url published_at.year published_at.month published_at.day|add:'-1' %}" class="btn btn-secondary">&lt;</a>
-                <input type="text" id="datePicker" class="form-control" value="{{ published_at|date:'Y-m-d' }}">
+                <input type="text" id="{% if is_startup_news %}startupDatePicker{% else %}datePicker{% endif %}" class="form-control" value="{{ published_at|date:'Y-m-d' }}">
                 <a href="{% url date_url published_at.year published_at.month published_at.day|add:'1' %}" class="btn btn-secondary">&gt;</a>
             </div>
             <div class="d-md-none">
@@ -51,38 +53,40 @@
                 <hr>
             </div>
             {% for news_source in news_sources %}
-                <div class="card mb-4" id="news-source-{{ forloop.counter }}">
-                    <div class="card-body">
-                        <h2 class="card-title"><a href="{{ news_source.url }}" target="_blank">{{ news_source.name }} ({{ news_source.representative_region }})</a></h2>
-                        <ul class="list-group">
-                            {% for article in news_source.published_articles %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center article-item" data-article-id="{{ article.id }}">
-                                <div class="d-flex align-items-center">
-                                    <button type="button" class="btn btn-sm toggle-favorite mr-2" data-article-id="{{ article.id }}">
-                                            <i class="fas fa-star {% if article.is_favorite %}text-warning{% else %}text-muted{% endif %}"></i>
-                                    </button>
-                                    <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
-                                </div>
-                                <div class="comment-section" comment-article-id="{{ article.id }}">
-                                    <div class="comment-form">
-                                        <textarea class="form-control comment-textarea" rows="6">{% if article.comment %}{{ article.comment }}{% endif %}</textarea>
-                                        <div class="comment-form-footer">
-                                            <button type="button" class="btn btn-sm btn-primary save-comment" data-article-id="{{ article.id }}">
-                                                <i class="fas fa-check"></i>
-                                            </button>
+                {% if news_source.published_articles %}
+                    <div class="card mb-4" id="news-source-{{ forloop.counter }}">
+                        <div class="card-body">
+                            <h2 class="card-title"><a href="{{ news_source.url }}" target="_blank">{{ news_source.name }} ({{ news_source.representative_region }})</a></h2>
+                            <ul class="list-group">
+                                {% for article in news_source.published_articles %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center article-item" data-article-id="{{ article.id }}">
+                                    <div class="d-flex align-items-center">
+                                        <button type="button" class="btn btn-sm toggle-favorite mr-2" data-article-id="{{ article.id }}">
+                                                <i class="fas fa-star {% if article.is_favorite %}text-warning{% else %}text-muted{% endif %}"></i>
+                                        </button>
+                                        <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                                    </div>
+                                    <div class="comment-section" comment-article-id="{{ article.id }}">
+                                        <div class="comment-form">
+                                            <textarea class="form-control comment-textarea" rows="6">{% if article.comment %}{{ article.comment }}{% endif %}</textarea>
+                                            <div class="comment-form-footer">
+                                                <button type="button" class="btn btn-sm btn-primary save-comment" data-article-id="{{ article.id }}">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="comment-icon" data-article-id="{{ article.id }}">
-                                    {% if article.comment %} <i class="fas fa-comment text-primary"></i> {% else %} <i class="far fa-comment"></i> {% endif %}
-                                </div>
-                            </li>
-                            {% empty %}
-                            <li class="list-group-item">No articles found for this news source on {{ published_at|date:"F j, Y" }}.</li>
-                            {% endfor %}
-                        </ul>
+                                    <div class="comment-icon" data-article-id="{{ article.id }}">
+                                        {% if article.comment %} <i class="fas fa-comment text-primary"></i> {% else %} <i class="far fa-comment"></i> {% endif %}
+                                    </div>
+                                </li>
+                                {% empty %}
+                                <li class="list-group-item">No articles found for this news source on {{ published_at|date:"F j, Y" }}.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% empty %}
                 <p>No news sources found.</p>
             {% endfor %}

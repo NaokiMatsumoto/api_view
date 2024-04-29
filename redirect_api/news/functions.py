@@ -26,6 +26,8 @@ def scrape_articles(news_source, shown=True):
             continue
         if news_source.host == 'weetracker.com' and article_title.startswith("Contact"):
             continue
+        if news_source.host == 'kr-asia.com' and article_title.find("[email protected]") != -1:
+            continue
         
         processed_urls.add(article_url)
 

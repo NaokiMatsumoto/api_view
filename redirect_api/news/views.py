@@ -127,6 +127,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
             )
         )
         
+        
         if self.region_id:
             queryset = queryset.filter(regions__id=self.region_id).distinct()
         queryset = queryset.order_by('representative_region')
@@ -143,6 +144,7 @@ class NewsSourceListView(LoginRequiredMixin, ListView):
         context['regions'] = Region.objects.all()
         context['date_url'] = self.date_url
         context['region_url'] = self.region_url
+        context['is_startup_news'] = self.is_startup_news
         return context
 
 class StarupNewsSourceListView(NewsSourceListView):
