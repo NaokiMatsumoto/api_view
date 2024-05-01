@@ -28,11 +28,11 @@ def scrape_articles(news_source, shown=True):
             article_url = f"https://{news_source.host}{article_url}"
         if article_host == 'ideasforgood.jp' and article_title.isdigit():
             continue
-        if news_source.host == 'weetracker.com' and article_title.startswith("Contact"):
+        if article_host == 'weetracker.com' and article_title.startswith("Contact"):
             continue
-        if news_source.host == 'kr-asia.com' and article_title.find("[email protected]") != -1:
+        if article_host == 'kr-asia.com' and article_title.find("[email protected]") != -1:
             continue
-        if news_source.host == 'techable.jp' and is_date_release_string(article_title):
+        if article_host == 'techable.jp' and is_date_release_string(article_title):
             continue
         
         processed_urls.add(article_url)
