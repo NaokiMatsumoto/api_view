@@ -30,9 +30,9 @@ def scrape_articles(news_source, shown=True):
             continue
         if article_host == 'weetracker.com' and article_title.startswith("Contact"):
             continue
-        if article_host == 'kr-asia.com' and article_title.find("[email protected]") != -1:
+        if news_source.host == 'kr-asia.com' and article_title.find("[email protected]") != -1:
             continue
-        if article_host == 'techable.jp' and is_date_release_string(article_title):
+        if news_source.host == 'techable.jp' and is_date_release_string(article_title):
             continue
         
         processed_urls.add(article_url)
