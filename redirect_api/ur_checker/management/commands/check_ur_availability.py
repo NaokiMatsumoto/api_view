@@ -53,8 +53,23 @@ class Command(BaseCommand):
             return False, 0
 
     def send_slack_notification(self, webhook_url, message):
-        payload = {"text": message}
-        response = requests.post(webhook_url, json=payload)
+        payload = {
+            "text": "重要: UR賃貸住宅に空きが出ました！",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: " + str(count)
+                    }
+                }
+            ]
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "X-Slack-Priority": "high"
+        }
+        response = requests.post(webhook_url, json=payload, headers=headers)
         if response.status_code != 200:
             self.stdout.write(self.style.ERROR(f"Slackへの通知送信に失敗しました。ステータスコード: {response.status_code}"))
         else:
