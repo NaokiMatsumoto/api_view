@@ -30,7 +30,7 @@ class Command(BaseCommand):
         if availability:
             slack_webhook_url = settings.SLACK_WEBHOOK_URL
             if slack_webhook_url:
-                message = f"@channel *重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: {count}"
+                message = f"*重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: {count}"
                 self.send_slack_notification(slack_webhook_url, message)
             else:
                 self.stdout.write(self.style.WARNING("Slack Webhook URLが設定されていません。"))
@@ -54,13 +54,13 @@ class Command(BaseCommand):
 
     def send_slack_notification(self, webhook_url, message):
         payload = {
-            "text": "重要: UR賃貸住宅に空きが出ました！",
+            "text": f"<@U07E2T4E1U7> {message}",
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": message,
+                        "text": f"<@U07E2T4E1U7> {message}",
                     }
                 }
             ]
@@ -70,6 +70,7 @@ class Command(BaseCommand):
             "X-Slack-Priority": "high"
         }
         response = requests.post(webhook_url, json=payload, headers=headers)
+        
         if response.status_code != 200:
             self.stdout.write(self.style.ERROR(f"Slackへの通知送信に失敗しました。ステータスコード: {response.status_code}"))
         else:
