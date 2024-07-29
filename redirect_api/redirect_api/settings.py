@@ -39,12 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'widget_tweaks',
-    'tempus_dominus',
+  #  'tempus_dominus',
     'api',
     'news',
     'accounts',
     'memo',
-    'diary',
+   # 'diary',
     'ur_checker',
 ]
 

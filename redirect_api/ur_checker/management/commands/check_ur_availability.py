@@ -30,7 +30,7 @@ class Command(BaseCommand):
         if availability:
             slack_webhook_url = settings.SLACK_WEBHOOK_URL
             if slack_webhook_url:
-                message = f"@9nmatsumoto UR賃貸住宅に空きが出ました！利用可能な部屋の数: {count}"
+                message = f"@channel *重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: {count}"
                 self.send_slack_notification(slack_webhook_url, message)
             else:
                 self.stdout.write(self.style.WARNING("Slack Webhook URLが設定されていません。"))
@@ -60,7 +60,7 @@ class Command(BaseCommand):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "*重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: " + str(count)
+                        "text": message,
                     }
                 }
             ]
