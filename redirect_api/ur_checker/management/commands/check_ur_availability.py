@@ -23,14 +23,14 @@ class Command(BaseCommand):
             "sp": "sp"
         }
 
-        availability, count = self.check_apartment_availability(search_url, form_data)
+        availability, count, room = self.check_apartment_availability(search_url, form_data)
         self.stdout.write(f"利用可能な部屋がありますか？ {availability}")
         self.stdout.write(f"利用可能な部屋の数: {count}")
 
         if availability:
             slack_webhook_url = settings.SLACK_WEBHOOK_URL
             if slack_webhook_url:
-                message = f"*重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: {count}"
+                message = f"*重要*: UR賃貸住宅に空きが出ました！\n利用可能な部屋の数: {count}, {room}\n*URL: *https://www.ur-net.go.jp/chintai/kansai/osaka/80_0420.html"
                 self.send_slack_notification(slack_webhook_url, message)
             else:
                 self.stdout.write(self.style.WARNING("Slack Webhook URLが設定されていません。"))
@@ -41,16 +41,17 @@ class Command(BaseCommand):
             response.raise_for_status()
             data = response.json()
             count = data.get('count', 0)
-            return count > 0, count
+            room = data.get('room', [''])[0]
+            return count > 0, count, room
         except requests.RequestException as e:
             self.stdout.write(self.style.ERROR(f"リクエストエラーが発生しました: {e}"))
-            return False, 0
+            return False, 0, ""
         except json.JSONDecodeError:
             self.stdout.write(self.style.ERROR("JSONのパースに失敗しました。"))
-            return False, 0
+            return False, 0, ""
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"予期せぬエラーが発生しました: {e}"))
-            return False, 0
+            return False, 0, ""
 
     def send_slack_notification(self, webhook_url, message):
         payload = {
