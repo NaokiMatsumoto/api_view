@@ -41,8 +41,11 @@ class Command(BaseCommand):
             response.raise_for_status()
             data = response.json()
             count = data.get('count', 0)
-            room = data.get('room', [''])[0]
-            return count > 0, count, room
+            room = data.get('room', '')
+            if isinstance(room, list) and any(r != "1R,1K" for r in room):
+                valid_room = next(r for r in room if r != "1R,1K")
+                return count > 0, count, valid_room
+            return False, 0, ""
         except requests.RequestException as e:
             self.stdout.write(self.style.ERROR(f"リクエストエラーが発生しました: {e}"))
             return False, 0, ""
