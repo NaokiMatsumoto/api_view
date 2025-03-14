@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'memo',
    'diary',
     'ur_checker',
+    'twitter_bot',
 ]
 
 MIDDLEWARE = [
