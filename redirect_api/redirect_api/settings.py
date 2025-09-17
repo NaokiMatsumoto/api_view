@@ -38,15 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'widget_tweaks',
-  #  'tempus_dominus',
     'api',
-    'news',
-    'accounts',
-    'memo',
-   'diary',
-    'ur_checker',
-    'twitter_bot',
 ]
 
 MIDDLEWARE = [
