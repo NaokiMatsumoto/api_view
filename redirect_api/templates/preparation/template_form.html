@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}テンプレート編集 - {{ object.name|default:'新規作成' }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto" data-template-id="{{ object.id }}">
+  <!-- Header -->
+  <div class="bg-white rounded-lg shadow-md mb-6">
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4 rounded-t-lg">
+      <div class="flex justify-between items-center gap-4">
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold text-white truncate">{{ object.name|default:'新規テンプレート' }}</h1>
+          {% if object.description %}
+            <p class="text-primary-100 text-sm truncate">{{ object.description }}</p>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="{% url 'seminar:template_list' %}" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-medium">一覧</a>
+          {% if object.pk %}
+            <form action="{% url 'seminar:template_copy' object.pk %}" method="post">
+              {% csrf_token %}
+              <button class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-medium">複製</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic form (Template itself) -->
+    <form method="post" class="p-6 space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">テンプレート名</label>
+          {{ form.name }}
+          {% for e in form.name.errors %}<p class="text-red-600 text-sm mt-1">{{ e }}</p>{% endfor %}
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">説明</label>
+          {{ form.description }}
+          {% for e in form.description.errors %}<p class="text-red-600 text-sm mt-1">{{ e }}</p>{% endfor %}
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded">保存</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Task templates -->
+  {% if object.pk %}
+  <div class="bg-white rounded-lg shadow-md">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-bold text-gray-900">タスクテンプレート</h2>
+  <p class="text-gray-600 text-sm mt-1">相対日（開催◯日前）を入力してください。</p>
+    </div>
+    <div class="p-6">
+      <!-- Add form -->
+      <div class="mb-6 bg-gray-50 border border-gray-200 rounded p-4" data-role="task-template-add-form">
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">タスク名</label>
+            <input type="text" data-field="name" class="px-3 py-2 border border-gray-300 rounded w-64" placeholder="例: 会場手配" maxlength="200">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">開催◯日前</label>
+            <input type="number" data-field="relative_days_before" class="px-3 py-2 border border-gray-300 rounded w-32" placeholder="例: 14">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">担当</label>
+            <input type="text" data-field="default_assignee" class="px-3 py-2 border border-gray-300 rounded w-40">
+          </div>
+          <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs text-gray-600 mb-1">メモ</label>
+            <input type="text" data-field="default_notes" class="px-3 py-2 border border-gray-300 rounded w-full">
+          </div>
+          <div>
+            <button type="button" data-role="add" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded">追加</button>
+          </div>
+          <div class="flex-1 min-w-[180px]"><span class="text-sm text-red-600" data-role="error" style="display:none"></span></div>
+        </div>
+      </div>
+
+      <!-- List -->
+      <ul class="divide-y" data-role="task-template-list">
+        {% for t in tasks %}
+          <li class="flex items-start gap-3 py-3" data-task-template-id="{{ t.id }}">
+            <div class="mt-1 text-gray-300 select-none">•</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-gray-900" data-role="name">{{ t.name }}</div>
+                  <div class="text-xs text-gray-500 mt-0.5" data-role="when">開催{{ t.when_display }}</div>
+                </div>
+                <div class="shrink-0 flex items-center gap-2">
+                  <button class="px-2 py-1 text-xs border rounded" data-role="edit">編集</button>
+                  <button class="px-2 py-1 text-xs border rounded text-red-600" data-role="delete">削除</button>
+                </div>
+              </div>
+              <div class="hidden mt-2" data-role="edit-form">
+                <div class="flex flex-wrap items-end gap-2">
+                  <input type="text" class="px-2 py-1 border rounded w-56" data-field="name" maxlength="200" placeholder="タスク名" value="{{ t.name }}">
+                  <input type="number" class="px-2 py-1 border rounded w-28" data-field="relative_days_before" placeholder="開催◯日前" value="{{ t.relative_days_before }}">
+                  <input type="text" class="px-2 py-1 border rounded w-40" data-field="default_assignee" placeholder="担当" value="{{ t.default_assignee }}">
+                  <input type="text" class="px-2 py-1 border rounded flex-1" data-field="default_notes" placeholder="メモ" value="{{ t.default_notes }}">
+                  <button class="px-3 py-1 text-xs bg-primary-600 text-white rounded" data-role="save">保存</button>
+                  <button class="px-3 py-1 text-xs border rounded" data-role="cancel">キャンセル</button>
+                  <span class="text-xs text-red-600" data-role="error" style="display:none"></span>
+                </div>
+              </div>
+            </div>
+          </li>
+        {% empty %}
+          <li class="py-6 text-gray-500">タスクテンプレートがありません。上のフォームから追加してください。</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/preparation_template.js' %}"></script>
+{% endblock %}

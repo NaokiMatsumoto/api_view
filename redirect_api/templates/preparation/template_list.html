@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}テンプレート一覧{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">準備テンプレート</h1>
+  <a href="{% url 'seminar:template_create' %}" class="bg-primary-600 text-white px-4 py-2 rounded">新規作成</a>
+</div>
+
+<div class="bg-white rounded-lg shadow divide-y">
+  {% for t in object_list %}
+    <div class="p-4 flex items-center justify-between">
+      <div>
+        <div class="font-medium text-lg"><a class="text-primary-700 hover:underline" href="{% url 'seminar:template_update' t.pk %}">{{ t.name }}</a></div>
+        {% if t.description %}<div class="text-gray-500 text-sm mt-1">{{ t.description }}</div>{% endif %}
+      </div>
+      <div class="flex items-center gap-2">
+        <form action="{% url 'seminar:template_copy' t.pk %}" method="post">
+          {% csrf_token %}
+          <button class="px-3 py-1 border rounded hover:bg-gray-50" type="submit">複製</button>
+        </form>
+        <a href="{% url 'seminar:template_update' t.pk %}" class="px-3 py-1 border rounded hover:bg-gray-50">編集</a>
+        <a href="{% url 'seminar:template_delete' t.pk %}" class="px-3 py-1 border rounded text-red-600 hover:bg-red-50">削除</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="p-6 text-gray-500">テンプレートがありません。右上の「新規作成」から追加してください。</div>
+  {% endfor %}
+</div>
+{% endblock %}

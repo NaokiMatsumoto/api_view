@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}セミナー一覧 - セミナー運営システム{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <svg class="w-8 h-8 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            セミナー一覧
+        </h1>
+        <p class="text-gray-600 mt-1">開催予定・過去のセミナーを管理</p>
+    </div>
+    <a href="{% url 'seminar:seminar_create' %}" class="bg-primary-600 text-white px-4 py-2 rounded">新規作成</a>
+</div>
+
+{% if object_list %}
+    <div class="max-w-3xl mx-auto space-y-3">
+        {% for seminar in object_list %}
+        <div class="seminar-card cursor-pointer bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm p-4 transition" data-href="{% url 'seminar:seminar_detail' seminar.id %}">
+            <div class="flex items-center justify-between gap-3">
+                <h3 class="text-base font-semibold text-gray-900 truncate">
+                    <a href="{% url 'seminar:seminar_detail' seminar.id %}" class="hover:underline underline-offset-2">{{ seminar.title }}</a>
+                </h3>
+                <div class="shrink-0 flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ seminar.get_format_display }}</span>
+                    <a href="{% url 'seminar:seminar_update' seminar.id %}" class="px-2 py-1 text-xs rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">編集</a>
+                    <a href="{% url 'seminar:copy' seminar.id %}" class="px-2 py-1 text-xs rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">複製</a>
+                </div>
+            </div>
+            <div class="mt-1 text-sm text-gray-600 truncate">
+                {% if seminar.location %}<span class="mr-2">{{ seminar.location }}</span>{% endif %}
+                {% if seminar.capacity %}<span class="mr-2">定員 {{ seminar.capacity }}名</span>{% endif %}
+                {% if seminar.price %}<span>¥{{ seminar.price|floatformat:0 }}</span>{% endif %}
+            </div>
+            <div class="mt-2 flex flex-wrap gap-1">
+                {% if seminar.dates.all %}
+                    {% for date in seminar.dates.all %}
+                    <span class="px-2 py-0.5 rounded bg-gray-50 border text-xs text-gray-700">{{ date.date|date:"Y/m/d" }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-xs text-gray-500">開催日 未設定</span>
+                {% endif %}
+            </div>
+            {% with total_tasks=seminar.total_tasks_count completed_tasks=seminar.completed_tasks_count %}
+            {% if total_tasks > 0 %}
+            <div class="mt-2">
+                {% widthratio completed_tasks total_tasks 100 as progress_percent %}
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                    <div class="h-1.5 rounded-full {% if seminar.all_dates_past %}bg-gray-400{% else %}bg-primary-500{% endif %}" style="width: {{ progress_percent }}%"></div>
+                </div>
+                <div class="mt-1 text-[11px] text-gray-500">{{ completed_tasks }}/{{ total_tasks }} ({{ progress_percent }}%)</div>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state py-12">
+        <svg class="w-24 h-24 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">セミナーがありません</h3>
+        <p class="text-gray-500 mb-6">最初のセミナーを作成して運営を開始しましょう。</p>
+        <a href="{% url 'seminar:seminar_create' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition duration-150 ease-in-out inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            新規セミナー作成
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/seminar_list.js' %}"></script>
+{% endblock %}

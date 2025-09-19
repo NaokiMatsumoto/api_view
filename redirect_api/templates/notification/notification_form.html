@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}通知設定の追加 - セミナー運営システム{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">通知設定の追加</h1>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">通知日数（開催日の◯日前）</label>
+        {{ form.days_before }}
+        {% if form.days_before.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.days_before.errors|striptags }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">送信先（複数選択可）</label>
+        {{ form.integrations }}
+        {% if form.integrations.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.integrations.errors|striptags }}</p>
+        {% endif %}
+        <p class="mt-1 text-xs text-gray-500">未選択の場合はアプリ共通設定（settingsやCLI引数）を使用します。</p>
+      </div>
+      <div class="pt-2">
+        <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded">保存</button>
+        <a href="{% url 'seminar:notification_list' %}" class="ml-3 px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">キャンセル</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

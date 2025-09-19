@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}通知設定一覧 - セミナー運営システム{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+<div class="flex flex-col gap-4 mb-8">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+        <svg class="w-8 h-8 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        通知設定一覧
+      </h1>
+      <p class="text-gray-600 mt-1">開催日の◯日前に通知する日数を管理します。</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'seminar:notification_create' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded">通知設定を追加</a>
+    </div>
+  </div>
+</div>
+</div>
+
+{% if settings %}
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200">
+  <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">通知日数（開催日の◯日前）</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">連携</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+          </tr>
+  </thead>
+  <tbody class="bg-white divide-y divide-gray-200">
+          {% for setting in settings %}
+          <tr id="row-{{ setting.id }}" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ setting.id }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <input type="number" value="{{ setting.days_before }}" min="0" step="1"
+                     class="w-28 px-2 py-1 border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-primary-300"
+                     onchange="updateSetting({{ setting.id }}, this.value)">
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <select multiple class="w-64 md:w-80 border rounded px-2 py-1 setting-integrations" size="5">
+                {% for integ in integrations %}
+                  <option value="{{ integ.pk }}" {% if integ in setting.integrations.all %}selected{% endif %}>
+                    [{{ integ.provider }}] {{ integ.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
+              <button type="button" onclick="saveSetting({{ setting.id }})"
+                      class="px-3 py-1.5 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700">
+                保存
+              </button>
+              <button type="button" onclick="deleteSetting({{ setting.id }})"
+                      class="px-3 py-1.5 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
+                削除
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+  </tbody>
+  </table>
+  </div>
+  </div>
+{% else %}
+  <div class="bg-white rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-600">
+  通知設定がありません。
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/notification_list.js' %}"></script>
+{% endblock %}

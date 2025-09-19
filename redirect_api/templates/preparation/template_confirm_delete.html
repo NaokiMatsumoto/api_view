@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}テンプレート削除{% endblock %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">テンプレートを削除</h1>
+<p class="mb-6">「{{ object.name }}」を削除します。よろしいですか？</p>
+<form method="post">
+  {% csrf_token %}
+  <a href="{% url 'seminar:template_list' %}" class="px-4 py-2 border rounded">キャンセル</a>
+  <button type="submit" class="ml-2 px-4 py-2 bg-red-600 text-white rounded">削除する</button>
+</form>
+{% endblock %}

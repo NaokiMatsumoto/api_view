@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ object.title }} - セミナー運営システム{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header Section (compact) -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
+        <div class="bg-gradient-to-r px-6 py-4 rounded-t-lg {% if object.all_dates_past %}from-gray-600 to-gray-700{% else %}from-primary-600 to-primary-700{% endif %}">
+            <div class="flex justify-between items-center gap-4">
+                <div class="min-w-0">
+                    <h1 class="text-2xl font-bold text-white truncate">{{ object.title }}</h1>
+                    {% if object.description %}
+                    <p class="text-primary-100 text-sm truncate">{{ object.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{% url 'seminar:seminar_update' object.id %}" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-medium">編集</a>
+                    <a href="{% url 'seminar:copy' object.id %}" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-medium">複製</a>
+                    <a href="{% url 'seminar:seminar_list' %}" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded text-xs font-medium">一覧</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- compact meta + progress -->
+        <div class="p-4">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-gray-700">
+                {% for date in object.dates.all %}
+                    <span class="px-2 py-0.5 rounded bg-gray-100 text-gray-700">{{ date.date|date:"Y/m/d (D)" }}</span>
+                {% empty %}
+                    <span class="text-gray-500">開催日 未設定</span>
+                {% endfor %}
+                <span class="px-2 py-0.5 rounded bg-primary-50 text-primary-700">{{ object.get_format_display }}</span>
+                {% if object.location %}<span class="px-2 py-0.5 rounded bg-gray-100">{{ object.location }}</span>{% endif %}
+                {% if object.capacity %}<span class="px-2 py-0.5 rounded bg-gray-100">定員 {{ object.capacity }}名</span>{% endif %}
+                {% if object.price %}<span class="px-2 py-0.5 rounded bg-gray-100">¥{{ object.price|floatformat:0 }}</span>{% endif %}
+            </div>
+
+            {% with total_tasks=object.total_tasks_count completed_tasks=object.completed_tasks_count percent=object.completed_percent %}
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs text-gray-500">完了率</span>
+                    <span class="text-xs text-gray-700" data-role="global-progress-count">{{ completed_tasks }}/{{ total_tasks }}{% if total_tasks > 0 %} ({{ percent }}%){% endif %}</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="{% if object.all_dates_past %}bg-gray-400{% else %}bg-primary-500{% endif %} h-2 rounded-full progress-bar" data-role="global-progress-bar" style="width: {% if total_tasks > 0 %}{{ percent }}{% else %}0{% endif %}%"></div>
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-6 mb-6 lg:flex-row lg:items-start">
+        <!-- Tasks Section (2/3 width on large screens) -->
+        <div class="bg-white rounded-lg shadow-md order-1 lg:order-2 lg:w-2/3">
+            <div class="px-8 py-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                <svg class="w-6 h-6 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                準備タスク
+            </h2>
+            <p class="text-gray-600 mt-1">セミナー準備のためのタスクリスト</p>
+        </div>
+        <div class="p-8" data-seminar-id="{{ object.id }}">
+            <!-- タスク追加フォーム -->
+            <div class="mb-6 bg-gray-50 border border-gray-200 rounded p-4">
+                <div class="flex flex-wrap items-end gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">タスク名</label>
+                        <input type="text" class="add-task-name px-3 py-2 border border-gray-300 rounded w-64" placeholder="例: 参加者名簿を印刷" maxlength="200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">期限</label>
+                        <input type="date" class="add-task-deadline px-3 py-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <button type="button" class="add-task-submit bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded">追加</button>
+                    </div>
+                    <div class="flex-1 min-w-[180px]">
+                        <span class="add-task-error text-sm text-red-600" style="display:none"></span>
+                    </div>
+                </div>
+            </div>
+            {% if tasks_grouped and tasks_grouped|length > 0 %}
+                <div class="space-y-4" id="task-list">
+                    {% for group in tasks_grouped %}
+                        <div class="border border-gray-200 rounded-lg overflow-hidden" data-date-key="{{ group.date_key }}">
+                            <button type="button" class="date-group-toggle group w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span class="font-semibold text-gray-900">{{ group.date|date:"Y/m/d (D)" }}</span>
+                                    <span class="text-xs text-gray-500">（{{ group.relative_text }}）</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded" data-role="group-completed">完了 {{ group.summary.completed }}/{{ group.summary.total }}</span>
+                                    <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded" data-role="group-overdue" {% if group.summary.overdue == 0 %}style="display:none"{% endif %}>期限超過 {{ group.summary.overdue }}</span>
+                                    <svg class="w-4 h-4 text-gray-400 group-[.open]:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </button>
+                            <div class="divide-y" data-accordion-panel hidden>
+                                {% for task in group.tasks %}
+                                <div class="task-item cursor-pointer {% if task.is_done %}task-completed{% elif task.is_overdue %}task-overdue{% else %}task-pending{% endif %} p-4" data-task-id="{{ task.id }}">
+                                    <div class="flex items-start gap-4">
+                                        <div class="mt-1">
+                                            <input type="checkbox" class="custom-checkbox task-checkbox" data-task-id="{{ task.id }}" {% if task.is_done %}checked{% endif %}>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h4 class="text-lg font-medium text-gray-900 {% if task.is_done %}line-through{% endif %}">{{ task.name }}</h4>
+                                                    {% if task.notes %}
+                                                    <p class="text-sm text-gray-500 mt-1 {% if task.is_done %}line-through{% endif %}">{{ task.notes }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="text-right">
+                                                    <div class="text-sm text-gray-600">担当: {{ task.assignee|default:"未設定" }}</div>
+                                                    <button type="button" class="task-edit-start mt-2 text-xs px-2 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">編集</button>
+                                                </div>
+                                            </div>
+                                            <!-- インライン編集フォーム -->
+                                            <div class="task-edit-form mt-3 hidden">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <input type="text" class="task-edit-name px-2 py-1 border border-gray-300 rounded w-64" value="{{ task.name }}" maxlength="200" placeholder="タスク名">
+                                                    <input type="date" class="task-edit-deadline px-2 py-1 border border-gray-300 rounded" value="{{ group.date_key }}">
+                                                    <button type="button" class="task-edit-save bg-primary-600 hover-bg-primary-700 text-white text-xs px-3 py-1 rounded">保存</button>
+                                                    <button type="button" class="task-edit-cancel text-xs px-3 py-1 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">キャンセル</button>
+                                                    <span class="task-edit-error text-xs text-red-600 ml-2" style="display:none"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state py-12">
+                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 00-2-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">タスクがありません</h3>
+                    <p class="text-gray-500">このセミナーにはまだタスクが設定されていません。</p>
+                </div>
+            {% endif %}
+        </div>
+        </div>
+
+        <aside class="bg-white rounded-lg shadow-md order-2 lg:order-1 lg:w-1/3 lg:sticky lg:top-24 lg:z-10">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">カレンダー</h2>
+                    <p class="text-sm text-gray-500">タスクの予定を一覧できます</p>
+                </div>
+                <div class="flex items-center gap-2" data-calendar-nav>
+                    <button type="button" class="calendar-nav-prev p-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="前の月">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <div class="text-sm font-medium text-gray-700" data-calendar-label>----</div>
+                    <button type="button" class="calendar-nav-next p-2 rounded border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="次の月">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4" id="seminar-calendar" data-calendar-root>
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-medium text-gray-500 mb-2">
+                    <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+                </div>
+                <div class="grid grid-cols-7 gap-2" data-calendar-grid>
+                    <!-- JS で日付セルを描画 -->
+                    <div class="col-span-7 text-center text-sm text-gray-400 py-6" data-calendar-empty>カレンダーを読み込み中...</div>
+                </div>
+            </div>
+            <div class="px-6 pb-4" data-calendar-legend>
+                <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                    <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-primary-500"></span>タスクあり</span>
+                    <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>期限超過あり</span>
+                    <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-gray-300"></span>完了済みのみ</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{{ calendar_events|json_script:"seminar-calendar-data" }}
+<script src="{% static 'js/seminar.js' %}"></script>
+<script src="{% static 'js/seminar_detail.js' %}"></script>
+{% endblock %}
+ 

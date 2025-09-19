@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if object %}{{ object.title }}を編集{% else %}新規セミナー作成{% endif %} - セミナー運営システム
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script src="{% static 'js/seminar.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-8 py-6 rounded-t-lg">
+            <h1 class="text-3xl font-bold text-white flex items-center">
+                <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {% if object %}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    {% else %}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    {% endif %}
+                </svg>
+                {% if object %}{{ object.title }}を編集{% else %}新規セミナー作成{% endif %}
+            </h1>
+            <p class="text-primary-100 mt-2">
+                {% if object %}セミナー情報を更新してください{% else %}新しいセミナーの詳細を入力してください{% endif %}
+            </p>
+        </div>
+
+        <div class="p-8">
+            <form method="post" class="seminar-form space-y-6" novalidate>
+                {% csrf_token %}
+                
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        セミナータイトル <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="{{ form.title.name }}" 
+                           id="{{ form.title.id_for_label }}"
+                           value="{{ form.title.value|default:'' }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input"
+                           placeholder="セミナーのタイトルを入力してください"
+                           required>
+                    {% if form.title.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {{ form.title.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if form.description %}
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <svg class="w-4 h-4 inline mr-1 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                        概要・説明
+                    </label>
+                    <textarea name="{{ form.description.name }}" 
+                              id="{{ form.description.id_for_label }}"
+                              rows="4"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input"
+                              placeholder="セミナーの概要や説明を入力してください">{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {{ form.description.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.location.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <svg class="w-4 h-4 inline mr-1 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            開催場所
+                        </label>
+                        <input type="text" 
+                               name="{{ form.location.name }}" 
+                               id="{{ form.location.id_for_label }}"
+                               value="{{ form.location.value|default:'' }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input"
+                               placeholder="会議室、オンライン、など">
+                        {% if form.location.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.location.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.format.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <svg class="w-4 h-4 inline mr-1 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            開催形式
+                        </label>
+                        <select name="{{ form.format.name }}" 
+                                id="{{ form.format.id_for_label }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input">
+                            <option value="">選択してください</option>
+                            {% for choice in form.format.field.choices %}
+                                <option value="{{ choice.0 }}" {% if form.format.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.format.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.format.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.capacity.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <svg class="w-4 h-4 inline mr-1 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            定員
+                        </label>
+                        <input type="number" 
+                               name="{{ form.capacity.name }}" 
+                               id="{{ form.capacity.id_for_label }}"
+                               value="{{ form.capacity.value|default:'' }}"
+                               min="1"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input"
+                               placeholder="参加者数の上限">
+                        {% if form.capacity.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.capacity.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.price.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <svg class="w-4 h-4 inline mr-1 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                            参加料金
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500">¥</span>
+                            <input type="number" 
+                                   name="{{ form.price.name }}" 
+                                   id="{{ form.price.id_for_label }}"
+                                   value="{{ form.price.value|default:'' }}"
+                                   min="0"
+                                   max="999999"
+                                   class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input"
+                                   placeholder="0">
+                        </div>
+                        {% if form.price.errors %}
+                            <div class="mt-1 text-sm text-red-600">
+                                {{ form.price.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- 開催日（複数） -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        開催日
+                    </h3>
+                    <p class="text-gray-600 mb-3 text-sm">複数追加できます。未入力でも保存可能ですが、準備タスクの期日計算には最も早い開催日（日付）が使われます。</p>
+
+                    {% now 'Y-m-d' as today %}
+                    {% if form.non_field_errors %}
+                        <div class="mb-3 text-sm text-red-600">
+                            {% for err in form.non_field_errors %}
+                                <div>{{ err }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div id="dates-container" class="space-y-3">
+                        {% if object %}
+                            {% for d in object.dates.all %}
+                                <div class="date-row flex items-center gap-3">
+                                    <input type="date" name="dates[]" value="{{ d.date|date:'Y-m-d' }}" min="{{ today }}" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input date-input">
+                                    <button type="button" class="remove-date-btn text-red-600 hover:text-red-700 px-3 py-2 rounded border border-red-200 hover:border-red-300">削除</button>
+                                </div>
+                            {% empty %}
+                                <div class="date-row flex items-center gap-3">
+                                    <input type="date" name="dates[]" min="{{ today }}" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input date-input">
+                                    <button type="button" class="remove-date-btn text-red-600 hover:text-red-700 px-3 py-2 rounded border border-red-200 hover:border-red-300">削除</button>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="date-row flex items-center gap-3">
+                                <input type="date" name="dates[]" min="{{ today }}" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input date-input">
+                                <button type="button" class="remove-date-btn text-red-600 hover:text-red-700 px-3 py-2 rounded border border-red-200 hover:border-red-300">削除</button>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="button" id="add-date-btn" class="bg-white text-primary-700 border border-primary-300 hover:bg-primary-50 px-4 py-2 rounded-md text-sm font-medium transition">+ 日付を追加</button>
+                    </div>
+                </div>
+
+                {% if not object %}
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                        準備タスクテンプレート
+                    </h3>
+                    <p class="text-gray-600 mb-4">セミナー準備のためのタスクテンプレートを選択してください（後で追加・編集可能）</p>
+                    <select name="template_id" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-150 ease-in-out form-input">
+                        <option value="">テンプレートを選択（オプション）</option>
+                        {% for template in preparation_templates %}
+                            <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                    <button type="submit" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-lg font-medium transition duration-150 ease-in-out flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        {% if object %}セミナーを更新{% else %}セミナーを作成{% endif %}
+                    </button>
+                    <a href="{% if object %}{% url 'seminar:seminar_detail' object.id %}{% else %}{% url 'seminar:seminar_list' %}{% endif %}" 
+                       class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-lg font-medium transition duration-150 ease-in-out text-center flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        キャンセル
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
